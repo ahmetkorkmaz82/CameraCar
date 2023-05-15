@@ -66,217 +66,244 @@ uint32_t cameraClientId = 0;
 const char* htmlHomePage PROGMEM = R"HTMLHOMEPAGE(
 <!DOCTYPE html>
 <html>
-  <head>
-  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
     <style>
-    .arrows {
-      font-size:40px;
-      color:red;
+        .arrows {
+            font-size: 40px;
+            color: blue;
 
-    }
-    .cut {
-      font-size:40px;
-      color:red;
+        }
 
-    }
-    td.button {
-      background-color:black;
-      border-radius:25%;
-      box-shadow: 5px 5px #888888;
-      text-align: center;
-    }
-    td.button:active {
-      transform: translate(5px,5px);
-      box-shadow: none; 
-    }
-    .noselect {
-      -webkit-touch-callout: none; /* iOS Safari */
-        -webkit-user-select: none; /* Safari */
-         -khtml-user-select: none; /* Konqueror HTML */
-           -moz-user-select: none; /* Firefox */
-            -ms-user-select: none; /* Internet Explorer/Edge */
-                user-select: none; /* Non-prefixed version, currently
+        .cut {
+            font-size: 40px;
+            color: red;
+        }
+
+        .move {
+            font-size: 40px;
+            color: white;
+        }
+
+        td.button {
+            background-color: #0BBACD;
+            border-radius: 25%;
+            box-shadow: 5px 5px #888888;
+            text-align: center;
+        }
+
+        td.button:active {
+            transform: translate(5px, 5px);
+            box-shadow: none;
+        }
+
+        .noselect {
+            -webkit-touch-callout: none;
+            /* iOS Safari */
+            -webkit-user-select: none;
+            /* Safari */
+            -khtml-user-select: none;
+            /* Konqueror HTML */
+            -moz-user-select: none;
+            /* Firefox */
+            -ms-user-select: none;
+            /* Internet Explorer/Edge */
+            user-select: none;
+            /* Non-prefixed version, currently
                                       supported by Chrome and Opera */
-    }
-    .slidecontainer {
-      width: 100%;
-    }
-  
-    .switch {
-  position: relative;
-  display: inline-block;
-  width: 40px;
-  height: 20px;
-}
+        }
 
-/* Hide default HTML checkbox */
-.switch input {
-  opacity: 0;
-  width: 0;
-  height: 0;
-}
+        .slidecontainer {
+            width: 100%;
 
-/* The slider */
-.slider {
-  position: absolute;
-  cursor: pointer;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background-color: #ccc;
-  -webkit-transition: .4s;
-  transition: .4s;
-}
+        }
 
-.slider:before {
-  position: absolute;
-  content: "";
-  height: 20px;
-  width: 20px;
-  left: 0px;
-  bottom: 0px;
-  background-color: white;
-  -webkit-transition: .4s;
-  transition: .4s;
-}
+        .switch {
+            position: relative;
+            display: inline-block;
+            width: 40px;
+            height: 20px;
+        }
 
-input:checked + .slider {
-  background-color: #2196F3;
-}
+        /* Hide default HTML checkbox */
 
-input:focus + .slider {
-  box-shadow: 0 0 1px #2196F3;
-}
+        .switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
 
-input:checked + .slider:before {
-  -webkit-transform: translateX(20px);
-  -ms-transform: translateX(20px);
-  transform: translateX(20px);
-}
+        /* The slider */
 
-/* Rounded sliders */
-.slider.round {
-  border-radius: 34px;
-}
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #A1A1A1;
+            -webkit-transition: .4s;
+            transition: .4s;
+        }
 
-.slider.round:before {
-  border-radius: 50%;
-}
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 20px;
+            width: 20px;
+            left: 0px;
+            bottom: 0px;
+            background-color: white;
+            -webkit-transition: .4s;
+            transition: .4s;
+        }
+
+        input:checked+.slider {
+            background-color: #2196F3;
+        }
+
+        input:focus+.slider {
+            box-shadow: 0 0 1px #2196F3;
+        }
+
+        input:checked+.slider:before {
+            -webkit-transform: translateX(20px);
+            -ms-transform: translateX(20px);
+            transform: translateX(20px);
+        }
+
+        /* Rounded sliders */
+
+        .slider.round {
+            border-radius: 34px;
+        }
+
+        .slider.round:before {
+            border-radius: 50%;
+        }
     </style>
-  
-  </head>
-  <body class="noselect" align="center" style="background-color:white">
-     
+
+</head>
+
+<body class="noselect" align="center" style="background-color:#D2D2D2">
+
     <!--h2 style="color: teal;text-align:center;">Wi-Fi Camera &#128663; Control</h2-->
-    
+
     <table id="mainTable" style="width:400px;margin:auto;table-layout:fixed" CELLSPACING=10>
-      <tr>
-        <img id="cameraImage" src="" style="width:400px;height:250px"></td>
-      </tr> 
-      <tr>
-        <td></td>
-        <td class="button" ontouchstart='sendButtonInput("MoveCar","1")' ontouchend='sendButtonInput("MoveCar","0")'><span class="arrows" >&#8673;</span></td>
-        <td></td>
-      </tr>
-      <tr>
-        <td class="button" ontouchstart='sendButtonInput("MoveCar","3")' ontouchend='sendButtonInput("MoveCar","0")'><span class="arrows" >&#10553;</span></td>
-        
-        <td class="button" ontouchstart='sendButtonInput("MoveCar","3")' ontouchend='sendButtonInarrowsput("MoveCar","0")'><span class="cut" >&#10540;</span>
-        </td> 
-        
-        <td class="button" ontouchstart='sendButtonInput("MoveCar","4")' ontouchend='sendButtonInput("MoveCar","0")'><span class="arrows" >&#10552;</span></td>
-      </tr>
-      <tr>
-        <td></td>
-        <td class="button" ontouchstart='sendButtonInput("MoveCar","2")' ontouchend='sendButtonInput("MoveCar","0")'><span class="arrows" >&#8675;</span></td>
-        <td></td>
-      </tr>
-      <tr/><tr/>
-      
-      <tr>
-        <td style="text-align:left"><b>Light:</b></td>
-        <td colspan=2>
-        <div class="slidecontainer">
-<label class="switch">
+
+        <tr>
+
+            <img id="cameraImage" src="" style="width:600px;height:400px"></td>
+        </tr>
+
+        <tr>
+
+            <td>
+
+            </td>
+            <td class="button" ontouchstart='sendButtonInput("MoveCamera","1")' ontouchend='sendButtonInput("MoveCamera","0")'><span class="arrows">&#8673;</span></td>
+            <td></td>
+        </tr>
+        <tr>
+            <td class="button" ontouchstart='sendButtonInput("MoveCamera","3")' ontouchend='sendButtonInput("MoveCamera","0")'><span class="arrows">&#10553;</span></td>
+
+            <td class="button" ontouchstart='sendButtonInput("MoveCamera","3")' ontouchend='sendButtonInarrowsput("MoveCamera","0")'><span class="cut">&#10540;</span>
+            </td>
+
+            <td class="button" ontouchstart='sendButtonInput("MoveCamera","4")' ontouchend='sendButtonInput("MoveCamera","0")'><span class="arrows">&#10552;</span></td>
+        </tr>
+        <tr>
+            <td></td>
+            <td class="button" ontouchstart='sendButtonInput("MoveCamera","2")' ontouchend='sendButtonInput("MoveCamera","0")'><span class="arrows">&#8675;</span></td>
+            <td></td>
+        </tr>
+        <tr/>
+        <tr/>
+
+        <tr>
+            <td style="text-align:left"><b>Light:</b></td>
+            <td colspan=2>
+                <div class="slidecontainer">
+                    <label class="switch">
   <input type="checkbox">
   <span class="slider round"></span>
 </label>
-          </div>
-        </td>   
-      </tr>
-      
-            <tr>
-        <td></td>
-        <td class="button" ontouchstart='sendButtonInput("MoveCar","1")' ontouchend='sendButtonInput("MoveCar","0")'><span class="arrows" >&#8593;</span></td>
-        <td></td>
-      </tr>
-      <tr>
-        <td class="button" ontouchstart='sendButtonInput("MoveCar","3")' ontouchend='sendButtonInput("MoveCar","0")'><span class="arrows" >&#8592;</span></td>
-        
-        <td class="button">
-        </td> 
-        
-        <td class="button" ontouchstart='sendButtonInput("MoveCar","4")' ontouchend='sendButtonInput("MoveCar","0")'><span class="arrows" >&#8594;</span></td>
-      </tr>
-      <tr>
-        <td></td>
-        <td class="button" ontouchstart='sendButtonInput("MoveCar","2")' ontouchend='sendButtonInput("MoveCar","0")'><span class="arrows" >&#8595;</span></td>
-        <td></td>
-      </tr>
-      <tr/><tr/>
+                </div>
+            </td>
+        </tr>
+
+        <tr>
+            <td></td>
+            <td class="button" ontouchstart='sendButtonInput("MoveCar","1")' ontouchend='sendButtonInput("MoveCar","0")'><span class="move">&#8593;</span></td>
+            <td></td>
+        </tr>
+        <tr>
+            <td class="button" ontouchstart='sendButtonInput("MoveCar","3")' ontouchend='sendButtonInput("MoveCar","0")'><span class="move">&#8592;</span></td>
+
+            <td class="button">
+            </td>
+
+            <td class="button" ontouchstart='sendButtonInput("MoveCar","4")' ontouchend='sendButtonInput("MoveCar","0")'><span class="move">&#8594;</span></td>
+        </tr>
+        <tr>
+            <td></td>
+            <td class="button" ontouchstart='sendButtonInput("MoveCar","2")' ontouchend='sendButtonInput("MoveCar","0")'><span class="move">&#8595;</span></td>
+            <td></td>
+        </tr>
+        <tr/>
+        <tr/>
     </table>
-  
+
     <script>
-      var webSocketCameraUrl = "ws:\/\/" + window.location.hostname + "/Camera";
-      var webSocketCarInputUrl = "ws:\/\/" + window.location.hostname + "/CarInput";      
-      var websocketCamera;
-      var websocketCarInput;
-      
-      function initCameraWebSocket() 
-      {
-        websocketCamera = new WebSocket(webSocketCameraUrl);
-        websocketCamera.binaryType = 'blob';
-        websocketCamera.onopen    = function(event){};
-        websocketCamera.onclose   = function(event){setTimeout(initCameraWebSocket, 2000);};
-        websocketCamera.onmessage = function(event)
-        {
-          var imageId = document.getElementById("cameraImage");
-          imageId.src = URL.createObjectURL(event.data);
-        };
-      }
-      
-      function initCarInputWebSocket() 
-      {
-        websocketCarInput = new WebSocket(webSocketCarInputUrl);
-        websocketCarInput.onopen    = function(event)
-        {
-          var speedButton = document.getElementById("Speed");
-          sendButtonInput("Speed", speedButton.value);
-          var lightButton = document.getElementById("Light");
-          sendButtonInput("Light", lightButton.value);
-        };
-        websocketCarInput.onclose   = function(event){setTimeout(initCarInputWebSocket, 2000);};
-        websocketCarInput.onmessage = function(event){};        
-      }
-      
-      function initWebSocket() 
-      {
-        initCameraWebSocket ();
-        initCarInputWebSocket();
-      }
-      function sendButtonInput(key, value) 
-      {
-        var data = key + "," + value;
-        websocketCarInput.send(data);
-      }
-    
-      window.onload = initWebSocket;
-      document.getElementById("mainTable").addEventListener("touchend", function(event){
-        event.preventDefault()
-      });      
+        var webSocketCameraUrl = "ws:\/\/" + window.location.hostname + "/Camera";
+        var webSocketCarInputUrl = "ws:\/\/" + window.location.hostname + "/CarInput";
+        var websocketCamera;
+        var websocketCarInput;
+
+        function initCameraWebSocket() {
+            websocketCamera = new WebSocket(webSocketCameraUrl);
+            websocketCamera.binaryType = 'blob';
+            websocketCamera.onopen = function(event) {};
+            websocketCamera.onclose = function(event) {
+                setTimeout(initCameraWebSocket, 2000);
+            };
+            websocketCamera.onmessage = function(event) {
+                var imageId = document.getElementById("cameraImage");
+                imageId.src = URL.createObjectURL(event.data);
+            };
+        }
+
+        function initCarInputWebSocket() {
+            websocketCarInput = new WebSocket(webSocketCarInputUrl);
+            websocketCarInput.onopen = function(event) {
+                var speedButton = document.getElementById("Speed");
+                sendButtonInput("Speed", speedButton.value);
+            };
+            websocketCarInput.onclose = function(event) {
+                setTimeout(initCarInputWebSocket, 2000);
+            };
+            websocketCarInput.onmessage = function(event) {};
+        }
+
+        function initWebSocket() {
+            initCameraWebSocket();
+            initCarInputWebSocket();
+        }
+
+        function sendButtonInput(key, value) {
+            var data = key + "," + value;
+            websocketCarInput.send(data);
+        }
+
+        window.onload = initWebSocket;
+        document.getElementById("mainTable").addEventListener("touchend", function(event) {
+            event.preventDefault()
+        });
     </script>
-  </body>    
+</body>
+
 </html>
 )HTMLHOMEPAGE";
 
