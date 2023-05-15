@@ -65,6 +65,7 @@ uint32_t cameraClientId = 0;
 
 const char* htmlHomePage PROGMEM = R"HTMLHOMEPAGE(
 <!DOCTYPE html>
+<!DOCTYPE html>
 <html>
 
 <head>
@@ -236,20 +237,20 @@ const char* htmlHomePage PROGMEM = R"HTMLHOMEPAGE(
 
         <tr>
             <td></td>
-            <td class="button" ontouchstart='sendButtonInput("MoveCar","1")' ontouchend='sendButtonInput("MoveCar","0")'><span class="move">&#8593;</span></td>
+            <td class="button" ontouchstart='sendButtonInput("MoveCar","1")' ontouchend='sendButtonInput("MoveCar","0")'><span class="move">	&#8657;</span></td>
             <td></td>
         </tr>
         <tr>
-            <td class="button" ontouchstart='sendButtonInput("MoveCar","3")' ontouchend='sendButtonInput("MoveCar","0")'><span class="move">&#8592;</span></td>
+            <td class="button" ontouchstart='sendButtonInput("MoveCar","3")' ontouchend='sendButtonInput("MoveCar","0")'><span class="move">&#8656;</span></td>
 
-            <td class="button">
+            <td class="button" ontouchstart='sendButtonInput("MoveCar","4")' ontouchend='sendButtonInput("MoveCar","0")'><span class="move">	&#9416;</span></td>
             </td>
 
-            <td class="button" ontouchstart='sendButtonInput("MoveCar","4")' ontouchend='sendButtonInput("MoveCar","0")'><span class="move">&#8594;</span></td>
+            <td class="button" ontouchstart='sendButtonInput("MoveCar","4")' ontouchend='sendButtonInput("MoveCar","0")'><span class="move">&#8658;</span></td>
         </tr>
         <tr>
             <td></td>
-            <td class="button" ontouchstart='sendButtonInput("MoveCar","2")' ontouchend='sendButtonInput("MoveCar","0")'><span class="move">&#8595;</span></td>
+            <td class="button" ontouchstart='sendButtonInput("MoveCar","2")' ontouchend='sendButtonInput("MoveCar","0")'><span class="move">	&#8659;</span></td>
             <td></td>
         </tr>
         <tr/>
