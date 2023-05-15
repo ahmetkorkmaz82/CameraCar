@@ -101,37 +101,68 @@ const char* htmlHomePage PROGMEM = R"HTMLHOMEPAGE(
     .slidecontainer {
       width: 100%;
     }
-    .slider {
-      -webkit-appearance: none;
-      width: 100%;
-      height: 15px;
-      border-radius: 5px;
-      background: #d3d3d3;
-      outline: none;
-      opacity: 0.7;
-      -webkit-transition: .2s;
-      transition: opacity .2s;
-    }
-    .slider:hover {
-      opacity: 1;
-    }
   
-    .slider::-webkit-slider-thumb {
-      -webkit-appearance: none;
-      appearance: none;
-      width: 25px;
-      height: 25px;
-      border-radius: 50%;
-      background: red;
-      cursor: pointer;
-    }
-    .slider::-moz-range-thumb {
-      width: 25px;
-      height: 25px;
-      border-radius: 50%;
-      background: red;
-      cursor: pointer;
-    }
+    .switch {
+  position: relative;
+  display: inline-block;
+  width: 40px;
+  height: 20px;
+}
+
+/* Hide default HTML checkbox */
+.switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+/* The slider */
+.slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: #ccc;
+  -webkit-transition: .4s;
+  transition: .4s;
+}
+
+.slider:before {
+  position: absolute;
+  content: "";
+  height: 20px;
+  width: 20px;
+  left: 0px;
+  bottom: 0px;
+  background-color: white;
+  -webkit-transition: .4s;
+  transition: .4s;
+}
+
+input:checked + .slider {
+  background-color: #2196F3;
+}
+
+input:focus + .slider {
+  box-shadow: 0 0 1px #2196F3;
+}
+
+input:checked + .slider:before {
+  -webkit-transform: translateX(20px);
+  -ms-transform: translateX(20px);
+  transform: translateX(20px);
+}
+
+/* Rounded sliders */
+.slider.round {
+  border-radius: 34px;
+}
+
+.slider.round:before {
+  border-radius: 50%;
+}
     </style>
   
   </head>
@@ -162,22 +193,38 @@ const char* htmlHomePage PROGMEM = R"HTMLHOMEPAGE(
         <td></td>
       </tr>
       <tr/><tr/>
-      <tr>
-        <td style="text-align:left"><b>Speed:</b></td>
-        <td colspan=2>
-         <div class="slidecontainer">
-            <input type="range" min="0" max="255" value="150" class="slider" id="Speed" oninput='sendButtonInput("Speed",value)'>
-          </div>
-        </td>
-      </tr>        
+      
       <tr>
         <td style="text-align:left"><b>Light:</b></td>
         <td colspan=2>
-          <div class="slidecontainer">
-            <input type="range" min="0" max="255" value="0" class="slider" id="Light" oninput='sendButtonInput("Light",value)'>
+        <div class="slidecontainer">
+<label class="switch">
+  <input type="checkbox">
+  <span class="slider round"></span>
+</label>
           </div>
         </td>   
       </tr>
+      
+            <tr>
+        <td></td>
+        <td class="button" ontouchstart='sendButtonInput("MoveCar","1")' ontouchend='sendButtonInput("MoveCar","0")'><span class="arrows" >&#8593;</span></td>
+        <td></td>
+      </tr>
+      <tr>
+        <td class="button" ontouchstart='sendButtonInput("MoveCar","3")' ontouchend='sendButtonInput("MoveCar","0")'><span class="arrows" >&#8592;</span></td>
+        
+        <td class="button">
+        </td> 
+        
+        <td class="button" ontouchstart='sendButtonInput("MoveCar","4")' ontouchend='sendButtonInput("MoveCar","0")'><span class="arrows" >&#8594;</span></td>
+      </tr>
+      <tr>
+        <td></td>
+        <td class="button" ontouchstart='sendButtonInput("MoveCar","2")' ontouchend='sendButtonInput("MoveCar","0")'><span class="arrows" >&#8595;</span></td>
+        <td></td>
+      </tr>
+      <tr/><tr/>
     </table>
   
     <script>
