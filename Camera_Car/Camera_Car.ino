@@ -72,17 +72,23 @@ const char* htmlHomePage PROGMEM = R"HTMLHOMEPAGE(
     .arrows {
       font-size:40px;
       color:red;
+
+    }
+    .cut {
+      font-size:40px;
+      color:red;
+
     }
     td.button {
       background-color:black;
       border-radius:25%;
       box-shadow: 5px 5px #888888;
+      text-align: center;
     }
     td.button:active {
       transform: translate(5px,5px);
       box-shadow: none; 
     }
-
     .noselect {
       -webkit-touch-callout: none; /* iOS Safari */
         -webkit-user-select: none; /* Safari */
@@ -92,11 +98,9 @@ const char* htmlHomePage PROGMEM = R"HTMLHOMEPAGE(
                 user-select: none; /* Non-prefixed version, currently
                                       supported by Chrome and Opera */
     }
-
     .slidecontainer {
       width: 100%;
     }
-
     .slider {
       -webkit-appearance: none;
       width: 100%;
@@ -108,7 +112,6 @@ const char* htmlHomePage PROGMEM = R"HTMLHOMEPAGE(
       -webkit-transition: .2s;
       transition: opacity .2s;
     }
-
     .slider:hover {
       opacity: 1;
     }
@@ -122,7 +125,6 @@ const char* htmlHomePage PROGMEM = R"HTMLHOMEPAGE(
       background: red;
       cursor: pointer;
     }
-
     .slider::-moz-range-thumb {
       width: 25px;
       height: 25px;
@@ -130,7 +132,6 @@ const char* htmlHomePage PROGMEM = R"HTMLHOMEPAGE(
       background: red;
       cursor: pointer;
     }
-
     </style>
   
   </head>
@@ -144,17 +145,20 @@ const char* htmlHomePage PROGMEM = R"HTMLHOMEPAGE(
       </tr> 
       <tr>
         <td></td>
-        <td class="button" ontouchstart='sendButtonInput("MoveCar","1")' ontouchend='sendButtonInput("MoveCar","0")'><span class="arrows" >&#8679;</span></td>
+        <td class="button" ontouchstart='sendButtonInput("MoveCar","1")' ontouchend='sendButtonInput("MoveCar","0")'><span class="arrows" >&#8673;</span></td>
         <td></td>
       </tr>
       <tr>
-        <td class="button" ontouchstart='sendButtonInput("MoveCar","3")' ontouchend='sendButtonInput("MoveCar","0")'><span class="arrows" >&#8678;</span></td>
-        <td class="button"></td>    
-        <td class="button" ontouchstart='sendButtonInput("MoveCar","4")' ontouchend='sendButtonInput("MoveCar","0")'><span class="arrows" >&#8680;</span></td>
+        <td class="button" ontouchstart='sendButtonInput("MoveCar","3")' ontouchend='sendButtonInput("MoveCar","0")'><span class="arrows" >&#10553;</span></td>
+        
+        <td class="button" ontouchstart='sendButtonInput("MoveCar","3")' ontouchend='sendButtonInarrowsput("MoveCar","0")'><span class="cut" >&#10540;</span>
+        </td> 
+        
+        <td class="button" ontouchstart='sendButtonInput("MoveCar","4")' ontouchend='sendButtonInput("MoveCar","0")'><span class="arrows" >&#10552;</span></td>
       </tr>
       <tr>
         <td></td>
-        <td class="button" ontouchstart='sendButtonInput("MoveCar","2")' ontouchend='sendButtonInput("MoveCar","0")'><span class="arrows" >&#8681;</span></td>
+        <td class="button" ontouchstart='sendButtonInput("MoveCar","2")' ontouchend='sendButtonInput("MoveCar","0")'><span class="arrows" >&#8675;</span></td>
         <td></td>
       </tr>
       <tr/><tr/>
@@ -214,7 +218,6 @@ const char* htmlHomePage PROGMEM = R"HTMLHOMEPAGE(
         initCameraWebSocket ();
         initCarInputWebSocket();
       }
-
       function sendButtonInput(key, value) 
       {
         var data = key + "," + value;
