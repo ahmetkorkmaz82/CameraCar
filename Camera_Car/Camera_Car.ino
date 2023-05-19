@@ -5,6 +5,16 @@
 #include <ESPAsyncWebServer.h>
 #include <iostream>
 #include <sstream>
+#include <ESP32Servo.h>
+
+#define PAN_PIN 14
+#define TILT_PIN 15
+
+Servo panServo;
+Servo tiltServo;
+
+int camera_height=5;
+int camera_angle=90;
 
 struct MOTOR_PINS
 {
@@ -15,9 +25,10 @@ struct MOTOR_PINS
 
 std::vector<MOTOR_PINS> motorPins = 
 {
-  {12, 13, 15},  //RIGHT_MOTOR Pins (EnA, IN1, IN2)
-  {12, 14, 2},  //LEFT_MOTOR  Pins (EnB, IN3, IN4)
+  {2, 12, 13}, //RIGHT_MOTOR Pins (EnA, IN1, IN2)
+  {2, 1, 3},  //LEFT_MOTOR  Pins (EnB, IN3, IN4)
 };
+
 #define LIGHT_PIN 4
 
 #define UP 1
@@ -64,7 +75,6 @@ AsyncWebSocket wsCarInput("/CarInput");
 uint32_t cameraClientId = 0;
 
 const char* htmlHomePage PROGMEM = R"HTMLHOMEPAGE(
-<!DOCTYPE html>
 <!DOCTYPE html>
 <html>
 
@@ -190,13 +200,21 @@ const char* htmlHomePage PROGMEM = R"HTMLHOMEPAGE(
 
 <body class="noselect" align="center" style="background-color:#D2D2D2">
 
-    <!--h2 style="color: teal;text-align:center;">Wi-Fi Camera &#128663; Control</h2-->
+    <h2 style="color: teal;text-align:center;">Bomb Disposal Robot</h2>
 
-    <table id="mainTable" style="width:400px;margin:auto;table-layout:fixed" CELLSPACING=10>
+    <table id="mainTable" style="width:600px;margin:auto;table-layout:fixed" CELLSPACING=10>
 
         <tr>
+            <td style="text-align:left" ; colspan=8>
+                <img id="cameraImage" src="" style="width:600px;height:400px">
+            </td>
+        </tr>
+        <tr>
+            <td style="text-align:center" colspan=3><b>Gripper Control</b></td>
+            <td></td>
+            <td></td>
 
-            <img id="cameraImage" src="" style="width:600px;height:400px"></td>
+            <td style="text-align:center" colspan=3><b>Robot Control</b></td>
         </tr>
 
         <tr>
@@ -204,57 +222,45 @@ const char* htmlHomePage PROGMEM = R"HTMLHOMEPAGE(
             <td>
 
             </td>
-            <td class="button" ontouchstart='sendButtonInput("MoveCamera","1")' ontouchend='sendButtonInput("MoveCamera","0")'><span class="arrows">&#8673;</span></td>
+            <td class="button" ontouchstart='sendButtonInput("Pan","90")' ontouchend='sendButtonInput("Pan","0")'><span class="arrows">&#8673;</span></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td class="button" ontouchstart='sendButtonInput("MoveCar","1")' ontouchend='sendButtonInput("MoveCar","0")'><span class="move">  &#8657;</span></td>
             <td></td>
         </tr>
         <tr>
-            <td class="button" ontouchstart='sendButtonInput("MoveCamera","3")' ontouchend='sendButtonInput("MoveCamera","0")'><span class="arrows">&#10553;</span></td>
+            <td class="button" ontouchstart='sendButtonInput("Tilt","90")' ontouchend='sendButtonInput("Tilt","0")'><span class="arrows">&#10553;</span></td>
 
-            <td class="button" ontouchstart='sendButtonInput("MoveCamera","3")' ontouchend='sendButtonInarrowsput("MoveCamera","0")'><span class="cut">&#10540;</span>
+            <td class="button" ontouchstart='sendButtonInput("Pan","0")' ontouchend='sendButtonInarrowsput("Pan","0")'><span class="cut">&#10540;</span>
             </td>
 
-            <td class="button" ontouchstart='sendButtonInput("MoveCamera","4")' ontouchend='sendButtonInput("MoveCamera","0")'><span class="arrows">&#10552;</span></td>
-        </tr>
-        <tr>
+            <td class="button" ontouchstart='sendButtonInput("Tilt","90")' ontouchend='sendButtonInput("Tilt","0")'><span class="arrows">&#10552;</span></td>
             <td></td>
-            <td class="button" ontouchstart='sendButtonInput("MoveCamera","2")' ontouchend='sendButtonInput("MoveCamera","0")'><span class="arrows">&#8675;</span></td>
             <td></td>
-        </tr>
-        <tr/>
-        <tr/>
-
-        <tr>
-            <td style="text-align:left"><b>Light:</b></td>
-            <td colspan=2>
-                <div class="slidecontainer">
-                    <label class="switch">
-  <input type="checkbox">
-  <span class="slider round"></span>
-</label>
-                </div>
-            </td>
-        </tr>
-
-        <tr>
-            <td></td>
-            <td class="button" ontouchstart='sendButtonInput("MoveCar","1")' ontouchend='sendButtonInput("MoveCar","0")'><span class="move">	&#8657;</span></td>
-            <td></td>
-        </tr>
-        <tr>
             <td class="button" ontouchstart='sendButtonInput("MoveCar","3")' ontouchend='sendButtonInput("MoveCar","0")'><span class="move">&#8656;</span></td>
 
-            <td class="button" ontouchstart='sendButtonInput("MoveCar","4")' ontouchend='sendButtonInput("MoveCar","0")'><span class="move">	&#9416;</span></td>
+            <td class="button" ontouchstart='sendButtonInput("MoveCar","0")' ontouchend='sendButtonInput("MoveCar","0")'><span class="move">  &#9416;</span></td>
             </td>
 
             <td class="button" ontouchstart='sendButtonInput("MoveCar","4")' ontouchend='sendButtonInput("MoveCar","0")'><span class="move">&#8658;</span></td>
         </tr>
         <tr>
             <td></td>
-            <td class="button" ontouchstart='sendButtonInput("MoveCar","2")' ontouchend='sendButtonInput("MoveCar","0")'><span class="move">	&#8659;</span></td>
+            <td class="button" ontouchstart='sendButtonInput("Pan","90")' ontouchend='sendButtonInput("Pan","0")'><span class="arrows">&#8675;</span></td>
             <td></td>
-        </tr>
-        <tr/>
-        <tr/>
+            <td style="text-align:right"><b>Light:</b></td>
+            <td colspan=2>
+                <div class="slidecontainer">
+                    <label class="switch">
+  <input type="checkbox" id="light" value="off" onclick='myFunction("Light")'>
+  <span class="slider round"></span>
+</label>
+
+            </td>
+            <td class="button" ontouchstart='sendButtonInput("MoveCar","2")' ontouchend='sendButtonInput("MoveCar","0")'><span class="move">  &#8659;</span></td>
+
     </table>
 
     <script>
@@ -287,17 +293,27 @@ const char* htmlHomePage PROGMEM = R"HTMLHOMEPAGE(
             };
             websocketCarInput.onmessage = function(event) {};
         }
-
+        
         function initWebSocket() {
             initCameraWebSocket();
             initCarInputWebSocket();
         }
-
+   
         function sendButtonInput(key, value) {
             var data = key + "," + value;
             websocketCarInput.send(data);
         }
-
+        function myFunction(key) {
+          // Get the checkbox
+          var checkBox = document.getElementById("light");
+          // Get the output text
+          // If the checkbox is checked, display the output text
+          if (checkBox.checked == true){
+             sendButtonInput(key, 100);
+          } else {
+            sendButtonInput(key,0);
+          }
+        } 
         window.onload = initWebSocket;
         document.getElementById("mainTable").addEventListener("touchend", function(event) {
             event.preventDefault()
@@ -417,7 +433,15 @@ void onCarInputWebSocketEvent(AsyncWebSocket *server,
         else if (key == "Light")
         {
           ledcWrite(PWMLightChannel, valueInt);         
-        }     
+        }
+        else if (key == "Pan")
+        {
+         panServo.write(valueInt);
+        }
+        else if (key == "Tilt")
+        {
+          tiltServo.write(valueInt);   
+        }          
       }
       break;
     case WS_EVT_PONG:
