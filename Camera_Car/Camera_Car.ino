@@ -7,14 +7,25 @@
 #include <sstream>
 #include <ESP32Servo.h>
 
-#define PAN_PIN 14
-#define TILT_PIN 15
+static int panAngle = 90;
+static int tiltAngle = 90;
+
+#define PAN_PIN 16
+#define TILT_PIN 0
+#define LIGHT_PIN 4
+#define MOTOR_EN     2
+#define LEFT_M0     14
+#define LEFT_M1     15
+#define RIGHT_M0    12
+#define RIGHT_M1    13
 
 Servo panServo;
 Servo tiltServo;
 
 int camera_height=5;
 int camera_angle=90;
+
+
 
 struct MOTOR_PINS
 {
@@ -25,17 +36,17 @@ struct MOTOR_PINS
 
 std::vector<MOTOR_PINS> motorPins = 
 {
-  {2, 12, 13}, //RIGHT_MOTOR Pins (EnA, IN1, IN2)
-  {2, 1, 3},  //LEFT_MOTOR  Pins (EnB, IN3, IN4)
+  {MOTOR_EN,RIGHT_M0, RIGHT_M1}, //RIGHT_MOTOR Pins (EnA, IN1, IN2)
+  {MOTOR_EN,LEFT_M0, LEFT_M1},  //LEFT_MOTOR  Pins (EnB, IN3, IN4)
 };
 
-#define LIGHT_PIN 4
+
 
 #define UP 1
-#define DOWN 2
-#define LEFT 3
-#define RIGHT 4
-#define STOP 0
+#define DOWN 9
+#define LEFT 7
+#define RIGHT 3
+#define STOP 5
 
 #define RIGHT_MOTOR 0
 #define LEFT_MOTOR 1
@@ -43,10 +54,12 @@ std::vector<MOTOR_PINS> motorPins =
 #define FORWARD 1
 #define BACKWARD -1
 
-const int PWMFreq = 1000; /* 1 KHz */
+const int PWMFreq = 1000; 
 const int PWMResolution = 8;
 const int PWMSpeedChannel = 2;
 const int PWMLightChannel = 3;
+//const int PWMPanChannel = 4;
+//const int PWMTiltChannel = 5;
 
 //Camera related constants
 #define PWDN_GPIO_NUM     32
@@ -202,11 +215,11 @@ const char* htmlHomePage PROGMEM = R"HTMLHOMEPAGE(
 
     <h2 style="color: teal;text-align:center;">Bomb Disposal Robot</h2>
 
-    <table id="mainTable" style="width:600px;margin:auto;table-layout:fixed" CELLSPACING=10>
+    <table id="mainTable" style="width:400px;margin:auto;table-layout:fixed" CELLSPACING=0>
 
         <tr>
             <td style="text-align:left" ; colspan=8>
-                <img id="cameraImage" src="" style="width:600px;height:400px">
+                <img id="cameraImage" src="" style="width:400px;height:400px">
             </td>
         </tr>
         <tr>
@@ -222,36 +235,36 @@ const char* htmlHomePage PROGMEM = R"HTMLHOMEPAGE(
             <td>
 
             </td>
-            <td class="button" ontouchstart='sendButtonInput("Pan","90")' ontouchend='sendButtonInput("Pan","0")'><span class="arrows">&#8673;</span></td>
+            <td class="button" ontouchstart='sendButtonInput("Pan",1)' ontouchend='sendButtonInput("Pan",0)'><span class="arrows">&#8673;</span></td>
             <td></td>
             <td></td>
             <td></td>
             <td></td>
-            <td class="button" ontouchstart='sendButtonInput("MoveCar","1")' ontouchend='sendButtonInput("MoveCar","0")'><span class="move">  &#8657;</span></td>
+            <td class="button" ontouchstart='sendButtonInput("MoveCar",1)' ontouchend='sendButtonInput("MoveCar",5)'><span class="move">&#8657;</span></td>
             <td></td>
         </tr>
         <tr>
-            <td class="button" ontouchstart='sendButtonInput("Tilt","90")' ontouchend='sendButtonInput("Tilt","0")'><span class="arrows">&#10553;</span></td>
+            <td class="button" ontouchstart='sendButtonInput("Tilt",9)' ontouchend='sendButtonInput("Tilt",0)'><span class="arrows">&#10553;</span></td>
 
-            <td class="button" ontouchstart='sendButtonInput("Pan","0")' ontouchend='sendButtonInarrowsput("Pan","0")'><span class="cut">&#10540;</span>
+            <td class="button" ontouchstart='sendButtonInput("Pan",0)' ontouchend='sendButtonInarrowsput("Pan",0)'><span class="cut">&#10540;</span>
             </td>
 
-            <td class="button" ontouchstart='sendButtonInput("Tilt","90")' ontouchend='sendButtonInput("Tilt","0")'><span class="arrows">&#10552;</span></td>
+            <td class="button" ontouchstart='sendButtonInput("Tilt",1)' ontouchend='sendButtonInput("Tilt",0)'><span class="arrows">&#10552;</span></td>
             <td></td>
             <td></td>
-            <td class="button" ontouchstart='sendButtonInput("MoveCar","3")' ontouchend='sendButtonInput("MoveCar","0")'><span class="move">&#8656;</span></td>
+            <td class="button" ontouchstart='sendButtonInput("MoveCar",3)' ontouchend='sendButtonInput("MoveCar",5)'><span class="move">&#8656;</span></td>
 
-            <td class="button" ontouchstart='sendButtonInput("MoveCar","0")' ontouchend='sendButtonInput("MoveCar","0")'><span class="move">  &#9416;</span></td>
+            <td class="button" ontouchstart='sendButtonInput("MoveCar",0)' ontouchend='sendButtonInput("MoveCar",5)'><span class="move">  &#9416;</span></td>
             </td>
 
-            <td class="button" ontouchstart='sendButtonInput("MoveCar","4")' ontouchend='sendButtonInput("MoveCar","0")'><span class="move">&#8658;</span></td>
+            <td class="button"  id="backward" ontouchstart='sendButtonInput("MoveCar","7")' ontouchend='sendButtonInput("MoveCar",5)'><span class="move">&#8658;</span></td>
         </tr>
         <tr>
             <td></td>
-            <td class="button" ontouchstart='sendButtonInput("Pan","90")' ontouchend='sendButtonInput("Pan","0")'><span class="arrows">&#8675;</span></td>
+            <td class="button" ontouchstart='sendButtonInput("Pan",9)' ontouchend='sendButtonInput("Pan","0")'><span class="arrows">&#8675;</span></td>
             <td></td>
             <td style="text-align:right"><b>Light:</b></td>
-            <td colspan=2>
+            <td>
                 <div class="slidecontainer">
                     <label class="switch">
   <input type="checkbox" id="light" value="off" onclick='myFunction("Light")'>
@@ -259,7 +272,8 @@ const char* htmlHomePage PROGMEM = R"HTMLHOMEPAGE(
 </label>
 
             </td>
-            <td class="button" ontouchstart='sendButtonInput("MoveCar","2")' ontouchend='sendButtonInput("MoveCar","0")'><span class="move">  &#8659;</span></td>
+            <td></td>
+            <td class="button" ontouchstart='sendButtonInput("MoveCar",9)' ontouchend='sendButtonInput("MoveCar",5)'><span class="move">  &#8659;</span></td>
 
     </table>
 
@@ -268,7 +282,12 @@ const char* htmlHomePage PROGMEM = R"HTMLHOMEPAGE(
         var webSocketCarInputUrl = "ws:\/\/" + window.location.hostname + "/CarInput";
         var websocketCamera;
         var websocketCarInput;
-
+        
+      function moveForward() {
+        var xhttp = new XMLHttpRequest();
+        xhttp.open('GET', '/forward', true);
+        xhttp.send();
+      }
         function initCameraWebSocket() {
             websocketCamera = new WebSocket(webSocketCameraUrl);
             websocketCamera.binaryType = 'blob';
@@ -300,7 +319,7 @@ const char* htmlHomePage PROGMEM = R"HTMLHOMEPAGE(
         }
    
         function sendButtonInput(key, value) {
-            var data = key + "," + value;
+            var data = key + "," + value + ",";
             websocketCarInput.send(data);
         }
         function myFunction(key) {
@@ -309,7 +328,7 @@ const char* htmlHomePage PROGMEM = R"HTMLHOMEPAGE(
           // Get the output text
           // If the checkbox is checked, display the output text
           if (checkBox.checked == true){
-             sendButtonInput(key, 100);
+            sendButtonInput(key, 100);
           } else {
             sendButtonInput(key,0);
           }
@@ -324,7 +343,7 @@ const char* htmlHomePage PROGMEM = R"HTMLHOMEPAGE(
 </html>
 )HTMLHOMEPAGE";
 
-
+/*
 void rotateMotor(int motorNumber, int motorDirection)
 {
   if (motorDirection == FORWARD)
@@ -343,7 +362,7 @@ void rotateMotor(int motorNumber, int motorDirection)
     digitalWrite(motorPins[motorNumber].pinIN2, LOW);       
   }
 }
-
+*/
 void moveCar(int inputValue)
 {
   Serial.printf("Got value as %d\n", inputValue);  
@@ -351,33 +370,57 @@ void moveCar(int inputValue)
   {
 
     case UP:
-      rotateMotor(RIGHT_MOTOR, FORWARD);
-      rotateMotor(LEFT_MOTOR, FORWARD);                  
+      digitalWrite(LEFT_M0,HIGH);
+      digitalWrite(LEFT_M1,LOW);
+      digitalWrite(RIGHT_M0,HIGH);
+      digitalWrite(RIGHT_M1,LOW);
+      //rotateMotor(RIGHT_MOTOR, FORWARD);
+      //rotateMotor(LEFT_MOTOR, FORWARD);                  
       break;
   
     case DOWN:
-      rotateMotor(RIGHT_MOTOR, BACKWARD);
-      rotateMotor(LEFT_MOTOR, BACKWARD);  
+      digitalWrite(LEFT_M0,LOW);
+      digitalWrite(LEFT_M1,HIGH);
+      digitalWrite(RIGHT_M0,LOW);
+      digitalWrite(RIGHT_M1,HIGH); 
+      //rotateMotor(RIGHT_MOTOR, BACKWARD);
+      //rotateMotor(LEFT_MOTOR, BACKWARD); 
       break;
   
     case LEFT:
-      rotateMotor(RIGHT_MOTOR, FORWARD);
-      rotateMotor(LEFT_MOTOR, BACKWARD);  
+      digitalWrite(LEFT_M0,HIGH);
+      digitalWrite(LEFT_M1,LOW);
+      digitalWrite(RIGHT_M0,LOW);
+      digitalWrite(RIGHT_M1,HIGH);
+      //rotateMotor(RIGHT_MOTOR, FORWARD);
+      //rotateMotor(LEFT_MOTOR, BACKWARD);  
       break;
   
     case RIGHT:
-      rotateMotor(RIGHT_MOTOR, BACKWARD);
-      rotateMotor(LEFT_MOTOR, FORWARD); 
+      digitalWrite(LEFT_M0,LOW);
+      digitalWrite(LEFT_M1,HIGH);
+      digitalWrite(RIGHT_M0,HIGH);
+      digitalWrite(RIGHT_M1,LOW);
+      //rotateMotor(RIGHT_MOTOR, BACKWARD);
+      //rotateMotor(LEFT_MOTOR, FORWARD); 
       break;
  
     case STOP:
-      rotateMotor(RIGHT_MOTOR, STOP);
-      rotateMotor(LEFT_MOTOR, STOP);    
+      digitalWrite(LEFT_M0,LOW);
+      digitalWrite(LEFT_M1,LOW);
+      digitalWrite(RIGHT_M0,LOW);
+      digitalWrite(RIGHT_M1,LOW);
+      //rotateMotor(RIGHT_MOTOR, STOP);
+      //rotateMotor(LEFT_MOTOR, STOP);    
       break;
   
     default:
-      rotateMotor(RIGHT_MOTOR, STOP);
-      rotateMotor(LEFT_MOTOR, STOP);    
+      digitalWrite(LEFT_M0,LOW);
+      digitalWrite(LEFT_M1,LOW);
+      digitalWrite(RIGHT_M0,LOW);
+      digitalWrite(RIGHT_M1,LOW);
+      //rotateMotor(RIGHT_MOTOR, STOP);
+      //rotateMotor(LEFT_MOTOR, STOP);    
       break;
   }
 }
@@ -407,7 +450,9 @@ void onCarInputWebSocketEvent(AsyncWebSocket *server,
     case WS_EVT_DISCONNECT:
       Serial.printf("WebSocket client #%u disconnected\n", client->id());
       moveCar(0);
-      ledcWrite(PWMLightChannel, 0);  
+      ledcWrite(PWMLightChannel, 0);
+      panServo.write(panAngle);
+      tiltServo.write(tiltAngle); 
       break;
     case WS_EVT_DATA:
       AwsFrameInfo *info;
@@ -432,15 +477,17 @@ void onCarInputWebSocketEvent(AsyncWebSocket *server,
         }
         else if (key == "Light")
         {
-          ledcWrite(PWMLightChannel, valueInt);         
+          ledcWrite(PWMLightChannel, valueInt);
         }
         else if (key == "Pan")
         {
-         panServo.write(valueInt);
+          Pan(valueInt);
+          //ledcWrite(PWMPanChannel, valueInt);     
         }
         else if (key == "Tilt")
         {
-          tiltServo.write(valueInt);   
+          Tilt(valueInt);
+          //ledcWrite(PWMTiltChannel, valueInt);     
         }          
       }
       break;
@@ -449,6 +496,46 @@ void onCarInputWebSocketEvent(AsyncWebSocket *server,
       break;
     default:
       break;  
+  }
+}
+void Pan(int inputValue)
+{
+  Serial.printf("Got value as %d\n", inputValue);  
+  switch(inputValue)
+  {
+    case UP:
+      if (panAngle<180){
+        panAngle++;
+        }   
+    break;
+    case DOWN:
+       if (panAngle>0){
+        panAngle--;
+        }
+    break;
+   default:
+    panServo.write(panAngle);
+    break; 
+  }
+}
+void Tilt(int inputValue)
+{
+  Serial.printf("Got value as %d\n", inputValue);  
+  switch(inputValue)
+  {
+    case UP:
+      if (tiltAngle<180){
+        tiltAngle++;
+        }   
+    break;
+    case DOWN:
+       if (tiltAngle>0){
+        tiltAngle--;
+        }
+    break;
+   default:
+    tiltServo.write(tiltAngle); 
+    break; 
   }
 }
 
@@ -553,7 +640,7 @@ void sendCameraPicture()
   }
   
   unsigned long  startTime3 = millis();  
-  Serial.printf("Time taken Total: %d|%d|%d\n",startTime3 - startTime1, startTime2 - startTime1, startTime3-startTime2 );
+  //Serial.printf("Time taken Total: %d|%d|%d\n",startTime3 - startTime1, startTime2 - startTime1, startTime3-startTime2 );
 }
 
 void setUpPinModes()
@@ -561,20 +648,20 @@ void setUpPinModes()
   //Set up PWM
   ledcSetup(PWMSpeedChannel, PWMFreq, PWMResolution);
   ledcSetup(PWMLightChannel, PWMFreq, PWMResolution);
-      
+  //ledcSetup(PWMPanChannel, PWMFreq, PWMResolution);
+  //ledcSetup(PWMTiltChannel, PWMFreq, PWMResolution);
+  panServo.attach(PAN_PIN);
+  tiltServo.attach(TILT_PIN);
   for (int i = 0; i < motorPins.size(); i++)
-  {
-    pinMode(motorPins[i].pinEn, OUTPUT);    
+  { 
+    pinMode(motorPins[i].pinEn, OUTPUT);   
     pinMode(motorPins[i].pinIN1, OUTPUT);
-    pinMode(motorPins[i].pinIN2, OUTPUT);  
-
-    /* Attach the PWM Channel to the motor enb Pin */
-    ledcAttachPin(motorPins[i].pinEn, PWMSpeedChannel);
+    pinMode(motorPins[i].pinIN2, OUTPUT);
+    ledcAttachPin(motorPins[i].pinEn, PWMSpeedChannel);  
   }
   moveCar(STOP);
-
-  pinMode(LIGHT_PIN, OUTPUT);    
-  ledcAttachPin(LIGHT_PIN, PWMLightChannel);
+  pinMode(LIGHT_PIN, OUTPUT);
+  ledcAttachPin(LIGHT_PIN, PWMLightChannel);    
 }
 
 
@@ -609,5 +696,5 @@ void loop()
   wsCamera.cleanupClients(); 
   wsCarInput.cleanupClients(); 
   sendCameraPicture(); 
-  Serial.printf("SPIRam Total heap %d, SPIRam Free Heap %d\n", ESP.getPsramSize(), ESP.getFreePsram());
+  //Serial.printf("SPIRam Total heap %d, SPIRam Free Heap %d\n", ESP.getPsramSize(), ESP.getFreePsram());
 }
